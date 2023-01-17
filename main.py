@@ -127,8 +127,6 @@ SLIDES_FOLDER = {
     "pdfname": "",
     "pdfname2": ""
 }
-
-
 #---
 def make_dir_name(t):
     # get directory from url
@@ -141,6 +139,12 @@ def make_dir_name(t):
     SLIDES_FOLDER["pdfname"] = pdfname
     #---
     dir_name = "slides/" + pdfname
+    #---
+    logger.info(f"SLIDES_FOLDER dir: {dir_name}")
+    #---
+    # create a directory to save the images
+    if not os.path.isdir(dir_name):
+        os.makedirs(dir_name)
     #---
     return dir_name
 
@@ -235,12 +239,6 @@ def download_images(url):
         return False
     # get directory from url
     SLIDES_FOLDER["dir"] = make_dir_name(url)
-    #---
-    logger.info(f"SLIDES_FOLDER dir: {SLIDES_FOLDER['dir']}")
-    #---
-    # create a directory to save the images
-    if not os.path.isdir(SLIDES_FOLDER["dir"]):
-        os.makedirs(SLIDES_FOLDER["dir"])
     #---
     no_of_images = len(images)
     #---
