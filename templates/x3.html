@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<HTML lang=en dir=ltr xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="noindex">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SlideShare bot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js'></script>
+	<link href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" />
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+        </div>
+      </nav>
+    </header>
+
+    <main id="body">
+      <div class='container'>
+        <h1>Welcome to SlideShare bot!</h1>
+        <h4><a href="https://t.me/slides_share_bot" target="_blank">@slides_share_bot</a></h4>
+		<div class='row content'>
+			<div class='col-6'>
+				<b>All users: <span id="users-all">0</span></b>
+				<table class='table display compact table-striped' id="users">
+					
+					<thead>
+					<tr>
+						<th>user</th>
+						<th>count</th>
+					</tr>
+					</thead>
+				</table>
+				<tbody></tbody>
+			</div>
+			<div class='col-6'>
+			  <b>All downloads: <span id="downloads-all">0</span></b>
+              <table class='table display compact table-striped' id="dates">
+                <thead>
+                  <tr>
+                    <th>date</th>
+                    <th>count</th>
+                  </tr>
+                </thead>
+				<tbody></tbody>
+              </table>
+			</div>
+		</div>
+      </div>
+    </main>
+
+    <footer class='app-footer'>
+    </footer>
+
+<script>
+let opr = {
+	searching: false,
+	lengthMenu: [[50, 100, 150, 200], [50, 100, 150, 200]],
+	paging: true,
+	scrollY: 500
+	// ordering:  false
+};
+// $('.display').DataTable(opr);
+function make_tds(data, id) {
+	//---
+	var r = $('#' + id).DataTable(opr);
+	//---
+	var numb = 0;
+	//---
+	$.each(data, function(index, va){
+		if (index != 'test') {
+			if (id == 'users') {
+				numb += 1;
+			} else {
+				numb += va.count;
+			}
+			r.row.add([index, va.count]).draw(false);
+		};
+	});
+	//---
+	if (id == 'users') {
+		$('#users-all').text(numb);
+	} else {
+		$('#downloads-all').text(numb);
+	}
+	//---
+};
+
+$(document).ready( function () {
+	fetch('/users')
+		.then(response => response.json())
+		.then(data => make_tds(data, 'users'));
+
+	fetch('/dates')
+	.then(response => response.json())
+		.then(data => make_tds(data, 'dates'));
+	} );
+</script>
+</body>
+
+</html>
