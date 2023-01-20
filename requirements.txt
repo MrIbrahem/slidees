@@ -6,4 +6,4 @@ python_telegram_bot==13.14
 requests==2.27.1
 telegram==0.0.1
 waitress==2.1.2
-MarkupSafe=2.0.1
+MarkupSafe==2.0.1

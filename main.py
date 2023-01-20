@@ -231,12 +231,19 @@ def download_images(url):
     #---
     get_title_and_author(soup)
     #---
-    images = soup.find_all("img", class_="slide-image")
-    #images = soup.findAll("img", {"class":"slide-image"})
+    '''<source srcset="https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-320.jpg?cb=1667313207 320w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-638.jpg?cb=1667313207 638w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/75/2-5-2048.jpg?cb=1667313207 2048w" sizes="100vw" type="image/webp">'''
+    #---
+    images = soup.find_all("source", attrs={"type": "image/webp"})
+    #---
+    if not images:
+        # print("No images found")
+        images = soup.find_all("img", class_="slide-image")
+    #---
     # Exit if presentation not found
     if not images:
         tel_send_message("No slides were found...")
         return False
+    #---
     # get directory from url
     SLIDES_FOLDER["dir"] = make_dir_name(url)
     #---
@@ -284,7 +291,7 @@ def download_images(url):
                 create_image_file(image_path, width, height, numb)
 
     # "\x1b[1K" clear to end of line
-    tel_send_message("%d Slides downloaded, %d errors" %
+    tel_send_message("%d Slides downloaded with best quality, %d errors" %
                      (img_success, img_errors))
     if img_success == 0:
         tel_send_message("Can't download any slides...")
@@ -325,6 +332,7 @@ def log_one(jsfile='users.json', val=''):
 
 #---
 def convert_to_pdf(pdf_name, images_dir):
+    if not os.path.isdir(images_dir) : return False
     # Get all slides sorted by name
     slides = [os.path.join(images_dir, s) for s in os.listdir(images_dir)]
 
@@ -349,6 +357,7 @@ def convert_to_pdf(pdf_name, images_dir):
         pd2.close()
         file_true = file2
     except Exception as e:
+        print("Exception: %s" % e)
         tel_send_message("Exception: %s" % e)
         return ""
     #---
@@ -362,16 +371,16 @@ def convert_to_pdf(pdf_name, images_dir):
 
 #---
 def start_with_url(url):
+    bot.send_chat_action(chat_id=update.message.chat_id,
+                         action=ChatAction.UPLOAD_DOCUMENT)
     images_dir = download_images(url)
     if not images_dir:
         return Response("ok", status=200)
     pdf_name = SLIDES_FOLDER["pdfname"]
 
-    bot.send_chat_action(chat_id=update.message.chat_id,
-                         action=ChatAction.UPLOAD_DOCUMENT)
 
     result_file = convert_to_pdf(pdf_name, images_dir)
-    if result_file == "":
+    if not result_file or result_file == "":
         tel_send_message("Error generating pdf")
         return Response("ok", status=200)
     #---
