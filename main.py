@@ -11,6 +11,7 @@ https://slideshare.net/MrIbrahem/3-40437776
 slideshare.net/MrIbrahem/3-40437776
 
 """
+print(__dir__)
 import logging
 import os
 import json
@@ -27,7 +28,7 @@ from telegram import (
 )
 import img2pdf
 import sys
-
+sys.path.append(os.path.abspath(__dir__))
 sys.dont_write_bytecode = True
 import shutil
 import urllib
