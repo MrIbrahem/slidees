@@ -1,5 +1,5 @@
 beautifulsoup4==4.11.1
-flask==2.1.2
+Flask==2.1.2
 img2pdf==0.4.4
 Pillow==9.4.0
 python_telegram_bot==13.14
