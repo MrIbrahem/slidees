@@ -14,7 +14,7 @@ slideshare.net/MrIbrahem/3-40437776
 print(__file__)
 import sys
 import os
-sys.path.append(os.path.abspath(__dir__))
+# sys.path.append(os.path.abspath(__dir__))
 import logging
 import json
 from datetime import datetime, timezone
