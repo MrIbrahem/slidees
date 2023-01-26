@@ -11,7 +11,7 @@ https://slideshare.net/MrIbrahem/3-40437776
 slideshare.net/MrIbrahem/3-40437776
 
 """
-print(__dir__)
+print(__file__)
 import logging
 import os
 import json
