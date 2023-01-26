@@ -12,9 +12,10 @@ slideshare.net/MrIbrahem/3-40437776
 
 """ 
 print(__file__)
+import sys
+import os
 sys.path.append(os.path.abspath(__dir__))
 import logging
-import os
 import json
 from datetime import datetime, timezone
 # import requests
@@ -28,7 +29,6 @@ from telegram import (
     Update,
 )
 import img2pdf
-import sys
 sys.dont_write_bytecode = True
 import shutil
 import urllib
