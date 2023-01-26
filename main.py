@@ -72,8 +72,6 @@ bot_msg_id = {1: False, "text": ""}
 #---
 def tel_send_message(text, edit=False):
     """Send a message to a chat."""
-
-    #url = f'https://api.telegram.org/bot{TOKEN}/sendMessage'
     #payload = { 'chat_id': chat_id, 'text': text }
     #r = requests.post(url, json=payload)
     #return r
@@ -97,7 +95,7 @@ def tel_send_message(text, edit=False):
                 #---
                 bot_msg_id[1] = mss.message_id
                 bot_msg_id["text"] = mss.text
-                logger.info(f"Message sent: {mss.message_id}")
+                logger.info("Message sent:" + mss.message_id)
             else:
                 text2 = bot_msg_id["text"] + "\n" + text
                 #---
@@ -141,7 +139,7 @@ def make_dir_name(t):
     #---
     dir_name = "slides/" + pdfname
     #---
-    logger.info(f"SLIDES_FOLDER dir: {dir_name}")
+    logger.info("SLIDES_FOLDER dir:" + dir_name)
     #---
     # create a directory to save the images
     if not os.path.isdir(dir_name):
@@ -186,7 +184,7 @@ def create_image_file(image_path, width, height, numb):
     # edit the previous message
     # create empty image file
     # create an image
-    mytext = f"Error downloading slide: {numb}"
+    mytext = "Error downloading slide:" + numb
 
     wi = width or 800
     he = height or 600
@@ -250,7 +248,7 @@ def download_images(url):
     #---
     no_of_images = len(images)
     #---
-    line = f"Slides to download: {no_of_images}"
+    line = "Slides to download:" + no_of_images
     # tel_send_message(line, edit=True)
     #---
     # get image hight and width
@@ -267,14 +265,14 @@ def download_images(url):
         image_url = image.get("srcset").split(",")[-1].split("?")[0]
         # Format image name to include slide index (with leading zeros)
         image_name = (
-            f'{str(idx).zfill(len(str(no_of_images)))}-{image_url.split("/")[-1]}'
+            str(idx).zfill(len(str(no_of_images))) + "-" + {image_url.split("/")[-1]
         )
         # Save path of image (cwd/slides/image_name)
         image_path = os.path.join(SLIDES_FOLDER["dir"], image_name)
 
         # Check if slide is already downloaded
         if os.path.isfile(image_path):
-            print(f"Slide: {idx} exists")
+            print("Slide: %s exists" % str(idx) )
             img_success += 1
         else:
             try:
@@ -286,7 +284,7 @@ def download_images(url):
                     width, height = im.size
             except Exception as e:
                 img_errors += 1
-                logger.info(f"Error downloading slide: {image_url}")
+                logger.info("Error downloading slide:" + image_url)
                 tel_send_message("Error downloading slide number %d " % numb,
                                  edit=True)
                 create_image_file(image_path, width, height, numb)
@@ -341,20 +339,20 @@ def convert_to_pdf(pdf_name, images_dir):
 
     # Combine slides into a pdf using img2pdf
     pdf_bytes = img2pdf.convert(slides)
-    file1 = f"pdfs/{pdf_name}.pdf"
+    file1 = "pdfs/" + pdf_name + ".pdf"
     file2 = "pdfs/result%s.pdf" % random.randint(0, 99)  # random file name
     file_true = ""
     try:
         with open(file1, "wb") as pd:
             pd.write(pdf_bytes)
-            print(f"Generated: {file1}")
+            print("Generated: " + file1)
         pd.close()
         file_true = file1
     except PermissionError:
         print("PermissionError")
         with open(file2, "wb") as pd2:
             pd2.write(pdf_bytes)
-            print(f"saved to : {file2}")
+            print("saved to :" + file2)
         pd2.close()
         file_true = file2
     except Exception as e:
@@ -389,7 +387,7 @@ def start_with_url(url):
     log_one(jsfile='dates.json', val=today_date)
     #---
     # Send pdf to telegram
-    filename2 = f"{SLIDES_FOLDER['pdfname2']}.pdf"
+    filename2 = SLIDES_FOLDER['pdfname2'] + ".pdf"
     bot.send_document(
         chat_id=update.message.chat_id,
         document=open(result_file, "rb"),
@@ -424,7 +422,7 @@ def timeout(message, max=60000):
     try:
         event_age_ms = get_message_age(message)
     except Exception as e:
-        logger.info(f'timeout except: {e}')
+        logger.info( 'timeout except: ' + e )
     # Ignore events that are too old
     if event_age_ms < max:
         return False
@@ -458,7 +456,7 @@ def returnwebsite():
     text += "<table class='sortable table table-striped alignleft'><tr><th>user</th><th>count</th></tr>"
     #---
     for user, count in tab.items():
-        text += f'<tr><td>{user}</td><td>{count}</td></tr>'
+        text += '<tr><td>' + user + '</td><td>' + count + '</td></tr>'
     #---
     text += "</table>"
     #---
@@ -469,7 +467,7 @@ def returnwebsite():
     text += "<table class='sortable table table-striped alignleft'><tr><th>date</th><th>count</th></tr>"
     #---
     for date, count in tab2.items():
-        text += f'<tr><td>{date}</td><td>{count}</td></tr>'
+        text += '<tr><td>' + date + '</td><td>' + count + '</td></tr>'
     #---
     text += "</table>"
     #---
@@ -496,7 +494,7 @@ def dates():
 @app.route('/', methods=['POST', 'GET'])
 #---
 def index():
-    print(f'method: {request.method} ')
+    print( 'method: ' + request.method)
     if request.method != "POST":
         return render_template('x3.html')
     #---
@@ -548,7 +546,7 @@ def index():
             bot.send_message(chat_id=update.message.chat_id,
                              text='send me slideshare.net link')
         except Exception as e:
-            print('Error line 511 : %s' % e)
+            print('Error line 511 : %s' % str(e))
         return Response("ok", status=200)
     #---
     #if timeout(update.message):
@@ -559,7 +557,7 @@ def index():
         bot.send_chat_action(chat_id=update.message.chat_id,
                              action=ChatAction.TYPING)
     except Exception as e:
-        logger.info(f'Exception: {e}')
+        logger.info('Exception: {e}' + str(e) )
         return Response("ok", status=200)
     #---
     reg = r'^(https?:\/\/)?(www\.)?slideshare.net\/.*$'
