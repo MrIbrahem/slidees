@@ -11,7 +11,6 @@ https://slideshare.net/MrIbrahem/3-40437776
 slideshare.net/MrIbrahem/3-40437776
 
 """
-from flask import Flask, request, render_template, Response
 import logging
 import os
 import json
@@ -52,6 +51,7 @@ except Exception as e:
 #r = requests.get(urle)
 #print(r.text)
 #---
+from flask import Flask, request, render_template, Response
 username = False
 #---
 if not os.path.isdir('pdfs'): os.makedirs("pdfs")
