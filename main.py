@@ -46,8 +46,8 @@ except Exception as e:
     #print(os.environ)
     sys.exit(1)
 
-urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slidees.mribrahem.repl.co/"
-urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slide-tyob.onrender.com"
+# urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slidees.mribrahem.repl.co/"
+# urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slide-tyob.onrender.com"
 #r = requests.get(urle)
 #print(r.text)
 #---
