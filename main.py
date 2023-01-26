@@ -44,7 +44,7 @@ try:
 except Exception as e:
     print("ERROR: Cannot get token from environment:%s" % e)
     #print(os.environ)
-    sys.exit(1)
+    sys.exit(1) 
 '''
 # urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slidees.mribrahem.repl.co/"
 # urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slide-tyob.onrender.com"
