@@ -264,9 +264,7 @@ def download_images(url):
         # Get image url from srcset attribute (csv of image urls, with last value being the highest res)
         image_url = image.get("srcset").split(",")[-1].split("?")[0]
         # Format image name to include slide index (with leading zeros)
-        image_name = (
-            str(idx).zfill(len(str(no_of_images))) + "-" + {image_url.split("/")[-1]
-        )
+        image_name = str(idx).zfill(len(str(no_of_images))) + "-" + {image_url.split("/")[-1]
         # Save path of image (cwd/slides/image_name)
         image_path = os.path.join(SLIDES_FOLDER["dir"], image_name)
 
