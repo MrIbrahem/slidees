@@ -3,3 +3,4 @@
 .env
 __pycache__
 m.py
+*.pdf
