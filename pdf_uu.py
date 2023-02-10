@@ -61,7 +61,7 @@ def get_title_and_author(soup):
         author = author.find("span", itemprop="name")
         if author:
             author = author.text
-            #print("author:" + author)
+            #loggerinfo("author:" + author)
     #---
     if author != "":
         title = title.strip() + "-" + author.strip()
@@ -132,7 +132,7 @@ def convert_to_pdf(pdf_name, images_dir):
     # Get all slides sorted by name
     slides = [os.path.join(images_dir, s) for s in os.listdir(images_dir)]
 
-    # print("Generating pdf...")
+    # loggerinfo("Generating pdf...")
 
     # Combine slides into a pdf using img2pdf
     pdf_bytes = img2pdf.convert(slides)
@@ -142,18 +142,18 @@ def convert_to_pdf(pdf_name, images_dir):
     try:
         with open(file1, "wb") as pd:
             pd.write(pdf_bytes)
-            # print(f"Generated: {file1}")
+            # loggerinfo(f"Generated: {file1}")
         pd.close()
         file_true = file1
     except PermissionError:
-        # print("PermissionError")
+        # loggerinfo("PermissionError")
         with open(file2, "wb") as pd2:
             pd2.write(pdf_bytes)
-            # print(f"saved to : {file2}")
+            # loggerinfo(f"saved to : {file2}")
         pd2.close()
         file_true = file2
     except Exception as e:
-        # print("Exception: %s" % e)
+        # loggerinfo("Exception: %s" % e)
         return "err", "Exception: %s" % e
     #---
     if file_true != "":
@@ -167,23 +167,69 @@ def convert_to_pdf(pdf_name, images_dir):
 #---
 def download_images(fa_dir, html):
     #---
+    global username
+    #---
     soup = BeautifulSoup(html, "html.parser")
     #---
     pdfname2 = get_title_and_author(soup)
     #---
-    '''<source srcset="https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-320.jpg?cb=1667313207 320w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-638.jpg?cb=1667313207 638w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/75/2-5-2048.jpg?cb=1667313207 2048w" sizes="100vw" type="image/webp">'''
+    '''<source srcset="https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-320.jpg?cb=1667313207 320w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-638.jpg?cb=1667313207 638w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/75/2-5-2048.jpg?cb=1667313207 2048w" sizes="100vw" type="image/webp">
+    
+    <div class="slide current" id="slide-0" data-index="0">
+        <picture>
+            <source srcset="https://image.slidesharecdn.com/mon3m-210120210312/85/-1-320.jpg?cb=1671595783 320w, https://image.slidesharecdn.com/mon3m-210120210312/85/-1-638.jpg?cb=1671595783 638w, https://image.slidesharecdn.com/mon3m-210120210312/75/-1-2048.jpg?cb=1671595783 2048w" sizes="100vw" type="image/webp">
+            <img class="slide-image" alt="Sensitivity: Internal" data-index="1" src="https://image.slidesharecdn.com/mon3m-210120210312/85/-1-320.jpg?cb=1671595783" srcset="https://image.slidesharecdn.com/mon3m-210120210312/85/-1-320.jpg?cb=1671595783 320w, https://image.slidesharecdn.com/mon3m-210120210312/85/-1-638.jpg?cb=1671595783 638w" sizes="100vw" id="slide-image-0">
+        </picture>
+    </div>
+    '''
     #---
-    #images = soup.find_all("source", attrs={"type": "image/webp"})
+
     #---
-    #if not images:
-        # print("No images found")
-    images = soup.find_all("img", class_="slide-image")
+    urltabs = {}
+    #---
+    qualties = []
+    #---
+    images2 = soup.find_all("source", attrs={"type": "image/webp"})
+    for id2, imageo in enumerate(images2, start=1):
+        tests1 = [ x.strip() for x in imageo.get("srcset").split(",") ]
+        tab3 = {}
+        #---
+        for x in tests1:
+            regex_url = r'(https?:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&;\?\#\/.=]+) (\d+)w'
+            uux = re.match(regex_url, x)
+            if uux:
+                q = int(uux.group(2))
+                if not q in qualties:
+                    qualties.append(q)
+                tab3[q] = uux.group(1).split('?')[0].strip().split('#')[0].strip()
+        #---
+        if tab3 == {}:
+            tab3[320] = imageo.get("srcset").split(",")[-1].split("?")[0].strip()
+        #---
+        # sort tab3 by big key
+        tab3 = {k: v for k, v in sorted(tab3.items(), key=lambda item: item[0], reverse=True)}
+        # tab3 = { x: v for x, v in tab3 }
+        #---
+        urltabs[id2] = tab3
+    #---
+    # for i,v in urltabs.items():        loggerinfo(f"{i} : {v}")
+    #---
+    # qualties.sort()
+    # loggerinfo(qualties)
+    #---
+    key = 320
+    if len(qualties) == 3:
+        key = qualties[1]
+    #---
+    # loggerinfo(key)
+    #---
+    # images = soup.find_all("img", class_="slide-image")
     #---
     # Exit if presentation not found
-    if not images:
+    if not urltabs or urltabs == {}:
         return "err", "No slides were found..."
     #---
-    no_of_images = len(images)
+    no_of_images = len(urltabs)
     #---
     # line = f"Slides to download: {no_of_images}"
     #---
@@ -195,21 +241,38 @@ def download_images(fa_dir, html):
     #---
     # Parallelize slide downloading
     numb = 0
-    for idx, image in enumerate(images, start=1):
+    # for idx, image in enumerate(urltabs.items(), start=1):
+    for idx, image in urltabs.items():
         numb += 1
         # Get image url from srcset attribute (csv of image urls, with last value being the highest res)
-        image_url = image.get("srcset").split(",")[-1].split("?")[0]
+        #---
+        images_d = {}
+        #---
+        # Get image url from src attribute (csv of image urls, with last value being the highest res)
+        # loggerinfo(images_d)
+        #---
+        # loggerinfo(image)
+        #---
+        firstkey = list(image.keys())
+        # print(firstkey)
+        firstkey = list(image.keys())[0]
+        #---
+        if username == "Ibrahim_Qasim": key = firstkey
+        #---
+        image_url = image.get(key) or image.get(firstkey)
+        #---
+        loggerinfo(image_url)
+        #---
         # Format image name to include slide index (with leading zeros)
         xx = str(idx).zfill(len(str(no_of_images)))
-        image_name = (
-            f'{xx}-{image_url.split("/")[-1]}'
-        )
+        image_name = f'{xx}-{image_url.split("/")[-1]}'
+        #---
         # Save path of image (cwd/slides/image_name)
         image_path = os.path.join(fa_dir, image_name)
-
+        #---
         # Check if slide is already downloaded
         if os.path.isfile(image_path):
-            print(f"Slide: {idx} exists")
+            loggerinfo(f"Slide: {idx} exists")
             img_success += 1
         else:
             try:
@@ -227,7 +290,7 @@ def download_images(fa_dir, html):
                 create_image_file(image_path, width, height, numb)
     #---
     # "\x1b[1K" clear to end of line
-    message = "%d Slides downloaded with best quality, %d errors" % (img_success, img_errors)
+    message = "%d Slides downloaded quality:%d, %d errors" % (img_success, key, img_errors)
     #---
     if img_success == 0:
         return "err", "Can't download any slides..."
@@ -236,10 +299,12 @@ def download_images(fa_dir, html):
     #---
     return True, tab
 #---
-def start_with_url(url, username, tel_send_message, Loggerinfo):
+def start_with_url(url, Username, tel_send_message, Loggerinfo):
     #---
+    global username
     global loggerinfo
     loggerinfo = Loggerinfo
+    username = Username
     #---
     html = ""
     #---
@@ -297,6 +362,6 @@ def printe(s):
 #---
 if __name__ == '__main__':
     url = "https://www.slideshare.net/HashimKhalifa/ss-241614411?qid=08043576-36ab-49dd-ae8d-4ddfff78eeee&v=&b=&from_search=10"
-    _co, result = start_with_url(url, "testuser", printe, printe)
+    _co, result = start_with_url(url, "Ibrahim_Qasim", printe, printe)
     print(_co)
     print(result)

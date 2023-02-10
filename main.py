@@ -99,13 +99,16 @@ def tel_send_message(text, edit=False):
 #---
 import pdf_uu
 #---
+def logg(s):
+    logger.info(s)
+#---
 def start_with_url(url):
     #---
     global username
     #---
     bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     #---
-    _co, result = pdf_uu.start_with_url(url, username, tel_send_message, logger)
+    _co, result = pdf_uu.start_with_url(url, username, tel_send_message, logg)
     #---
     if _co == 'err':
         tel_send_message(result)
