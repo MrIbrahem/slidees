@@ -265,6 +265,7 @@ def download_images(fa_dir, html):
         #---
         # Format image name to include slide index (with leading zeros)
         xx = str(idx).zfill(len(str(no_of_images)))
+        #---
         image_name = f'{xx}-{image_url.split("/")[-1]}'
         #---
         # Save path of image (cwd/slides/image_name)
