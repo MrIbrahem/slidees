@@ -34,8 +34,8 @@
 					
 					<thead>
 					<tr>
-						<th>user</th>
-						<th>count</th>
+						<th>User</th>
+						<th>Count</th>
 					</tr>
 					</thead>
 				</table>
@@ -46,8 +46,8 @@
               <table class='table display compact table-striped' id="dates">
                 <thead>
                   <tr>
-                    <th>date</th>
-                    <th>count</th>
+                    <th>Date</th>
+                    <th>Count</th>
                   </tr>
                 </thead>
 				<tbody></tbody>
@@ -61,48 +61,54 @@
     </footer>
 
 <script>
-let opr = {
-	searching: false,
-	lengthMenu: [[50, 100, 150, 200], [50, 100, 150, 200]],
-	paging: true,
-	scrollY: 500
-	// ordering:  false
-};
-// $('.display').DataTable(opr);
-function make_tds(data, id) {
-	//---
-	var r = $('#' + id).DataTable(opr);
-	//---
-	var numb = 0;
-	//---
-	$.each(data, function(index, va){
-		if (index != 'test') {
-			if (id == 'users') {
-				numb += 1;
-			} else {
-				numb += va.count;
-			}
-			r.row.add([index, va.count]).draw(false);
-		};
-	});
-	//---
-	if (id == 'users') {
-		$('#users-all').text(numb);
-	} else {
-		$('#downloads-all').text(numb);
-	}
-	//---
-};
-
-$(document).ready( function () {
-	fetch('/users')
+	let opr = {
+		searching: false,
+		lengthMenu: [[50, 100, 150, 200], [50, 100, 150, 200]],
+		paging: true,
+		scrollY: 500
+		// ordering:  false
+	};
+	// $('.display').DataTable(opr);
+	function make_tds(data, id) {
+		//---
+		var r = $('#' + id).DataTable(opr);
+		//---
+		var numb = 0;
+		//---
+		$.each(data, function(index, va){
+			if (index != 'test') {
+				if (id == 'users') {
+					numb += 1;
+					r.row.add([index, va.count]).draw(false)
+				} else {
+					numb += va.count;
+					var ind = index.replace(/-/g, '');
+					var tr = $('<tr></tr>');
+					tr.append($('<td></td>').text(index).attr('data-sort', ind));
+					tr.append($('<td></td>').text(va.count));
+					r.row.add(tr).draw(false);
+					// r.row.add([index, va.count]).draw(false);
+				}
+			};
+		});
+		//---
+		if (id == 'users') {
+			$('#users-all').text(numb);
+		} else {
+			$('#downloads-all').text(numb);
+		}
+		//---
+	};
+	
+	$(document).ready( function () {
+		fetch('/users')
+			.then(response => response.json())
+			.then(data => make_tds(data, 'users'));
+	
+		fetch('/dates')
 		.then(response => response.json())
-		.then(data => make_tds(data, 'users'));
-
-	fetch('/dates')
-	.then(response => response.json())
-		.then(data => make_tds(data, 'dates'));
-	} );
+			.then(data => make_tds(data, 'dates'));
+		} );
 </script>
 </body>
 
