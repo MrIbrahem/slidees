@@ -106,8 +106,6 @@ def start_with_url(url):
     #---
     global username
     #---
-    bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    #---
     _co, result = pdf_uu.start_with_url(url, username, tel_send_message, logg)
     #---
     if _co == 'err':
@@ -121,15 +119,23 @@ def start_with_url(url):
         title    = result['title']
         filepath = result['filepath']
     #---
-    # Send pdf to telegram
-    bot.send_document(
-        chat_id = update.message.chat_id,
-        document = open(filepath, "rb"),
-        filename = title
-        )
+    try:
+        bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
+    except Exception as e:
+        print('Error line : %s' % str(e) )
     #---
-    # delete the pdf file
-    os.remove(filepath)
+    # Send pdf to telegram
+    try:
+        bot.send_document(
+            chat_id = update.message.chat_id,
+            document = open(filepath, "rb"),
+            filename = title
+            )
+        #---
+        # delete the pdf file
+        os.remove(filepath)
+    except Exception as e:
+        print('bot_send_message Error : %s' % str(e) )
     #---
     return Response("ok", status=200)
 #---
@@ -148,26 +154,29 @@ def get_message_age(message):
     logger.info(str(event_age_ms))
     return event_age_ms
 #---
+def bot_send_message(chat_id='', text=''):
+    try:
+        bot.send_message(chat_id=chat_id, text=text)
+    except Exception as e:
+        print('bot_send_message Error : %s' % str(e) )
+#---
 def timeout(message, max=60000):
     try:
         event_age_ms = get_message_age(message)
     except Exception as e:
         logger.info(f'timeout except: {e}')
+        return True
+    #---
     # Ignore events that are too old
     if event_age_ms < max:
         return False
     else:
         if update.effective_chat:
-            try:
-                bot.send_message(
-                    chat_id=update.effective_chat.id,
-                    text=
-                    'I thought you left. Please use /start command to restart the bot.'
-                )
-            except Exception as e:
-                print('Error line 416 : %s' % e)
-        logger.info('\n Dropped {} (age {}ms)'.format(update.update_id,
-                                                      event_age_ms))
+            bot_send_message(
+                chat_id=update.effective_chat.id,
+                text= 'I thought you left. Please use /start command to restart the bot.')
+            #---
+        logger.info('\n Dropped {} (age {}ms)'.format(update.update_id, event_age_ms))
         return True
 #---
 @app.route('/users', methods=['GET'])
@@ -200,11 +209,7 @@ def index():
     # your bot can receive updates without messages
     if not update.message:
         if update.effective_chat:
-            try:
-                bot.send_message(chat_id=update.effective_chat.id,
-                                 text='send a valid slideshare.net link')
-            except Exception as e:
-                print('Error line 496 : %s' % e)
+            bot_send_message(chat_id=update.effective_chat.id, text='send a valid slideshare.net link')
         return Response("ok", status=200)
     # chat_id = msg['message']['chat']['id']
     # msg_text = msg['message']['text']
@@ -215,11 +220,7 @@ def index():
     msg_text = update.message.text
     #---
     if not msg_text or type(msg_text) != str:
-        try:
-            bot.send_message(chat_id=update.message.chat_id,
-                             text='send me slideshare.net link')
-        except Exception as e:
-            print('Error line 498 : %s' % e)
+        bot_send_message(chat_id=update.message.chat_id, text='send me slideshare.net link')
         return Response("ok", status=200)
     #---
     if msg_text in ("/start", "/Start"):
@@ -229,49 +230,34 @@ def index():
         if update.message.from_user.username:
             user_data['username'] = update.message.from_user.username
             logger.info('\n Username: {}'.format(user_data['username']))
-        try:
-            bot.send_message(chat_id=update.message.chat_id,
-                             text='send me slideshare.net link')
-        except Exception as e:
-            print('Error line 511 : %s' % e)
+        #---
+        bot_send_message(chat_id=update.message.chat_id, text='send me slideshare.net link')
+        #---
         return Response("ok", status=200)
     #---
-    #if timeout(update.message):
-    #bot.send_message(chat_id=update.message.chat_id, text="Timeout")
-    #return
+    if timeout(update.message):
+        bot_send_message(chat_id=update.message.chat_id, text="Timeout")
+        return Response("ok", status=200)
     #---
     try:
-        bot.send_chat_action(chat_id=update.message.chat_id,
-                             action=ChatAction.TYPING)
+        bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.TYPING)
     except Exception as e:
         logger.info(f'Exception: {e}')
-        return Response("ok", status=200)
+        # return Response("ok", status=200)
     #---
     reg = r'^(https?:\/\/)?(www\.)?slideshare.net\/.*$'
     #---
-    valid_link = False
-    #---
-    if re.match(reg, msg_text):
-        valid_link = True
-        texts = "checking the link"
-    else:
-        texts = 'send a valid slideshare.net link'
-    #---
-    try:
-        bot.send_message(chat_id=update.message.chat_id, text=texts)
-        bot.send_message(chat_id=update.message.chat_id, text="Pay 350 BTC to use this bot,\njust kidding.. 😂")
-    except Exception as e:
-        print('Error line 550 : %s' % e)
-    #---
-    if valid_link:
-        return start_with_url(msg_text)
-    else:
+    if not re.match(reg, msg_text):
+        bot_send_message(chat_id=update.message.chat_id, text='send a valid slideshare.net link')
         return Response("ok", status=200)
     #---
-    #return Response("ok", status=200)
+    bot_send_message(chat_id=update.message.chat_id, text="checking the link..")
+    bot_send_message(chat_id=update.message.chat_id, text="Pay 350 BTC to use this bot,\njust kidding.. 😂")
+    #---
+    return start_with_url(msg_text)
+    #---
 #---
 if __name__ == "__main__":
-    #app.run(host='0.0.0.0', port=8080)
     from waitress import serve
     serve(app, host="0.0.0.0", port=8080)
 #----

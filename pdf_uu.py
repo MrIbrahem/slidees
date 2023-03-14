@@ -22,7 +22,14 @@ sys.dont_write_bytecode = True
 if not os.path.isdir('pdfs'): os.makedirs("pdfs")
 if not os.path.isdir('slides'): os.makedirs("slides")
 #---
-loggerinfo = False
+Print_result = False
+#---
+def printe(s):
+    if Print_result: return
+    #---
+    print(s)
+#---
+loggerinfo = printe
 username = False
 #---
 def make_file_and_dir_name(t):
@@ -183,8 +190,6 @@ def download_images(fa_dir, html):
     </div>
     '''
     #---
-
-    #---
     urltabs = {}
     #---
     qualties = []
@@ -300,11 +305,15 @@ def download_images(fa_dir, html):
     #---
     return True, tab
 #---
-def start_with_url(url, Username, tel_send_message, Loggerinfo):
+def start_with_url(url, Username, tel_send_message, Loggerinfo, printresult=False):
+    #---
+    global loggerinfo, Print_result
+    #---
+    Print_result = printresult
+    #---
+    if Loggerinfo != False: loggerinfo = Loggerinfo
     #---
     global username
-    global loggerinfo
-    loggerinfo = Loggerinfo
     username = Username
     #---
     html = ""
@@ -334,7 +343,7 @@ def start_with_url(url, Username, tel_send_message, Loggerinfo):
     if type(tab) == dict and _d == True:
         pdfname2 = tab.get("pdfname2", "")
         msg = tab.get("message", "")
-        if msg != '':
+        if msg != '' and tel_send_message != False:
             tel_send_message(msg)
     #---
     _err2, result_file = convert_to_pdf(pdf_name, imgs_dir)
@@ -357,9 +366,6 @@ def start_with_url(url, Username, tel_send_message, Loggerinfo):
     }
     #---
     return 'file', tab
-#---
-def printe(s):
-    print(s)
 #---
 if __name__ == '__main__':
     url = "https://www.slideshare.net/HashimKhalifa/ss-241614411?qid=08043576-36ab-49dd-ae8d-4ddfff78eeee&v=&b=&from_search=10"
