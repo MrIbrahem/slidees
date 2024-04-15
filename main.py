@@ -30,8 +30,9 @@ except Exception as e:
     #print(os.environ)
     sys.exit(1)
 #---
+urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://3e6d204d-2e36-4978-9b38-08fde9795220-00-1kx1b5ei4dfoq.janeway.replit.dev/"
 urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slidees.mribrahem.repl.co/"
-urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slide-tyob.onrender.com"
+# urle = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://slide-tyob.onrender.com"
 #---
 username = False
 #---

@@ -6,3 +6,4 @@ m.py
 *.pdf
 img_pdf.py
 *.jpg
+.env
