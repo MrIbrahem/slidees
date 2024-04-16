@@ -64,21 +64,16 @@ def get_title_and_author(soup):
     # j-author-name
     # ---
     title = ""
-    titles = soup.find_all("span", class_="j-title-breadcrumb")
-    if titles:
-        title = titles[0].text
-        title = re.sub(r"[\\/:*?\"\'<>|]", "-", title)
-        title = title.replace("\n", "")
+    # match title from <meta name="title" content="الاخطاء الانشائية فى مترو الانفاق بالقاهرة - ملف 12 صفحة"/>
+    ti = soup.find("meta", {"name": "title"})
+    if ti:
+        title = ti["content"]
     # ---
     author = ""
-    authors = soup.find_all("a", class_="j-author-name")
-    if authors:
-        author = authors[0]
-        # get span
-        author = author.find("span", itemprop="name")
-        if author:
-            author = author.text
-            # loggerinfo("author:" + author)
+    # find link with data-cy="slideshow-author"
+    u = soup.find("a", {"data-cy": "slideshow-author"})
+    if u:
+        author = u.text
     # ---
     if author != "":
         title = title.strip() + "-" + author.strip()
