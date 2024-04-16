@@ -4,6 +4,7 @@
 """
 import os
 import json
+import requests
 import re
 import sys
 import shutil
@@ -27,6 +28,7 @@ if not os.path.isdir("slides"):
 Print_result = False
 
 from get_urls import get_slide_urls
+
 
 def printe(s):
     if Print_result:
@@ -182,7 +184,7 @@ def convert_to_pdf(pdf_name, images_dir):
     return "err", ""
 
 
-def get_urls(soup):
+def get_urls2(soup):
     """<source srcset="https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-320.jpg?cb=1667313207 320w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/85/2-5-638.jpg?cb=1667313207 638w, https://image.slidesharecdn.com/random-141018135304-conversion-gate01/75/2-5-2048.jpg?cb=1667313207 2048w" sizes="100vw" type="image/webp">
 
     <div class="slide current" id="slide-0" data-index="0">
@@ -230,10 +232,10 @@ def download_images(fa_dir, url):
     # ---
     global username
     # ---
-    html = ""
-    # ---
     try:
-        html = urllib.request.urlopen(url)
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad status codes
+        html = response.text
     except Exception as e:
         return "err", "Can't read the url, try another one..."
     # ---
@@ -241,10 +243,11 @@ def download_images(fa_dir, url):
     # ---
     pdfname2 = get_title_and_author(soup)
     # ---
-    # urltabs, key = get_urls(soup)
-    urltabs, key = get_urls(soup)
+    # urltabs, key = get_urls2(soup)
     key = 320
     urltabs = get_slide_urls(url)
+    # ---
+    loggerinfo(f"len of urltabs : {len(urltabs)}")
     # ---
     if not urltabs or urltabs == {}:
         return "err", "No slides were found..."
@@ -336,7 +339,7 @@ def start_with_url(url, Username, tel_send_message, Loggerinfo, printresult=Fals
     # ---
     _d, tab = download_images(imgs_dir, url)
     # ---
-    if _d == "err" or _d is True:
+    if _d == "err" or _d is not True:
         return "err", tab
     # ---
     pdfname2 = ""
@@ -367,7 +370,7 @@ def start_with_url(url, Username, tel_send_message, Loggerinfo, printresult=Fals
 
 
 if __name__ == "__main__":
-    url = "https://www.slideshare.net/HashimKhalifa/ss-241614411?qid=08043576-36ab-49dd-ae8d-4ddfff78eeee&v=&b=&from_search=10"
+    url = "https://www.slideshare.net/slideshow/ss-138929641/138929641?from_search=0"
     _co, result = start_with_url(url, "Ibrahim_Qasim", printe, printe)
     print(_co)
     print(result)

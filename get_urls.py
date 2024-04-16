@@ -9,6 +9,7 @@ def get_slide_urls(url):
     # Extract totalSlides
     match = re.search(r'"totalSlides":(\d+),', response.text)
     total_slides = int(match.group(1)) if match else 0
+    print(f"total_slides:{total_slides}")
 
     # Extract slide information
     slide_data = re.search(r'"slides":\s*{(.*?)},"strippedTitle"', response.text, re.DOTALL).group(1)
@@ -41,12 +42,12 @@ def get_slide_urls(url):
             quality = image_size['quality']
             # ---
             url = f"{host}/{image_location}/{quality}/-{n}-{width}.{format2}"
-            slide_urls[n][quality] = url
+            slide_urls[n][width] = url
     # ---
     return slide_urls
 
 if __name__ == "__main__":
-    url = "https://www.slideshare.net/slideshow/ss-138929641/138929641?from_search=0"# @param
+    url = "https://www.slideshare.net/amroraouf/12-139666387"# @param
 
     slide_urls = get_slide_urls(url)
 
