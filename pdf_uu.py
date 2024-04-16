@@ -262,13 +262,12 @@ def download_images(fa_dir, url):
         # ---
         # images_d = {}
         # ---
-        firstkey = list(image.keys())
-        firstkey = list(image.keys())[0]
+        best_key = max(image.keys())
         # ---
         if username == "Ibrahim_Qasim":
-            key = firstkey
+            key = best_key
         # ---
-        image_url = image.get(key) or image.get(firstkey)
+        image_url = image.get(key) or image.get(best_key)
         # ---
         loggerinfo(image_url)
         # ---
